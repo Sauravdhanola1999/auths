@@ -1,0 +1,14 @@
+
+.node_modeules
+.env
+.DS_Store
+dist
+.vscode
+npm-debug.log*
+
+# TypeScript cache
+*.tsbuildinfo
+# Optional npm cache directory
+.npm
+# Optional eslint cache
+.eslintcache
