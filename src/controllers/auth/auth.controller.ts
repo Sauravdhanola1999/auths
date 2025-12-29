@@ -4,6 +4,7 @@ import { User } from "../../models/user.model";
 import { checkPassword, hashPassword } from "../../lib/hash";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../lib/email";
+import { createAccessToken, createRefreshToken } from "../../lib/token";
 
 const getAppUrl = () => {
   return process.env.APP_URL || `http://localhost:${process}`;
@@ -141,6 +142,48 @@ export const loginHandler = async (
         message: "Invalid Email or Password",
       });
     }
+
+    if (!user.isEmailVerified) {
+      res
+        .status(403)
+        .json({ message: "Please verify email before logging in" });
+      return;
+    }
+
+    const accessToken = createAccessToken(
+      user.id,
+      user.role,
+      user.tokenVersion,
+    );
+    
+    const refreshToken = createRefreshToken(
+      user.id, user.tokenVersion
+    );
+
+    const isProd = process.env.NODE_ENV === 'production';
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge : 7 * 24 * 6 * 60 * 1000
+    })
+         
+    res.status(200).json({
+      message: "login successfully done",
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        twoFactorEnabled: user.twoFactorEnabled
+      }
+    })
+
+    return;
+
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

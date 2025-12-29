@@ -15,6 +15,7 @@ const userSchema = new Schema({
     role: {
         type: String,
         enum: ['user', 'admin'],
+        default: 'user'
     },
     isEmailVerified: {
         type: Boolean,
@@ -31,7 +32,7 @@ const userSchema = new Schema({
         type: String,
         default: undefined
     },
-    tokeVersion:{
+    tokenVersion:{
         type: Number,
         default: 0
     },
